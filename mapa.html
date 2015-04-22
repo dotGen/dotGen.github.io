@@ -144,14 +144,16 @@ function seguirRuta(directionResult){
 }
 
 function gDer(){
-   window.navigator.vibrate(500);
-   setTimeout(function(){window.navigator.vibrate(500)}, 1500)
+  navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+  navigator.vibrate(500);
+   setTimeout(function(){navigator.vibrate(500)}, 1500)
    console.log("Derecha");
 }
 
 function gIzq(){
-   window.navigator.vibrate(1000);
-   console.log("Izquierda");
+  navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+  navigator.vibrate(1000);
+  console.log("Izquierda");
 }
 
 function attachInstructionText(marker, text) {
