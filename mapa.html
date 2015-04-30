@@ -115,7 +115,7 @@ function calcRoute() {
 function seguirRuta(directionResult){
    var myRoute = directionResult.routes[0].legs[0];
    var pathP = myRoute.steps[stepId].path[pathId];
-   var stepDir = myRoute.steps[stepId].instructions;
+   var stepDir = myRoute.steps[stepId + 1].instructions;
 
    marker.setPosition(pathP);
    if(pathId == myRoute.steps[stepId].path.length - 1){
