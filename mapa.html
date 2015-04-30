@@ -164,15 +164,9 @@ google.maps.event.addDomListener(window, 'load', initialize);
     </script>
   </head>
   <body>
-    <div id="panel" style="display:none">
-    <b>Start: </b>
-    <select id="start">
-      <option value="Calle Aguadulce, 77, 35004 Las Palmas de Gran Canaria, Las Palmas">Calle Aguadulce</option>
-    </select>
-    <b>End: </b>
-    <select id="end">
-      <option value="Calle Doctor Waksman, 1, 35003 Las Palmas de Gran Canaria, Las Palmas">Calle Doctor Waksman</option>
-    </select>
+    <div id="panel">
+       <input type="text" id="start" value="Inicio..">
+       <input type="text" id="end" value="Fin..">
     </div>
     <div id="map-canvas"></div>
     &nbsp;
