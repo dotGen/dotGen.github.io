@@ -54,7 +54,7 @@ function initialize() {
 
   // Instantiate an info window to hold step text.
   stepDisplay = new google.maps.InfoWindow();
-  calcRoute();
+  //calcRoute();
 
 }
 
@@ -165,8 +165,9 @@ google.maps.event.addDomListener(window, 'load', initialize);
   </head>
   <body>
     <div id="panel">
-       <input type="text" id="start" value="Inicio..">
-       <input type="text" id="end" value="Fin..">
+       Inicio: <input type="text" id="start">
+       Fin: <input type="text" id="end" >
+       <input type="button" id="calc" onclick="calcRoute()" value="Buscar">
     </div>
     <div id="map-canvas"></div>
     &nbsp;
