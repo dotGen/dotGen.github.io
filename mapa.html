@@ -118,14 +118,12 @@ function seguirRuta(directionResult){
    var stepDir = myRoute.steps[stepId].instructions;
 
    marker.setPosition(pathP);
-   if(myRoute.steps[stepId].path.length - pathId <= 1){
+   if(pathId == myRoute.steps[stepId].path.length - 1){
      if(stepDir.indexOf("derecha") >= 0){
         gDer();
      }else if(stepDir.indexOf("izquierda") >= 0){
         gIzq();
      }
-   }
-   if(pathId == myRoute.steps[stepId].path.length - 1){
     pathId = 0;
     stepId++;
    }else{
@@ -138,19 +136,18 @@ function seguirRuta(directionResult){
 
    console.log("stepId =" + stepId);
    console.log("pathId =" + pathId);
+   console.log("stepDir =" + stepDir)
 }
 
 function gDer(){
-  navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
-  navigator.vibrate(500);
-   setTimeout(function(){navigator.vibrate(500)}, 1500)
+   window.navigator.vibrate(500);
+   setTimeout(function(){window.navigator.vibrate(500)}, 1500)
    console.log("Derecha");
 }
 
 function gIzq(){
-  navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
-  navigator.vibrate(1000);
-  console.log("Izquierda");
+   window.navigator.vibrate(1000);
+   console.log("Izquierda");
 }
 
 function attachInstructionText(marker, text) {
