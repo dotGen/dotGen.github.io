@@ -33,8 +33,7 @@ function placeMarkerAndPanTo(latLng, map) {
   var image = 'image.png';
   var marker = new google.maps.Marker({
     position: latLng,
-    map: map,
-	icon: image
+    map: map
   });
   map.panTo(latLng);
 }
