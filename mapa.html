@@ -57,33 +57,8 @@ function initialize() {
   //calcRoute();
 
 }
-function startP(){
-    if (navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(calcRoute,showError);
-    }
-}
-function locationP(){
-  
-}
-function showError(error)
-    {
-        switch(error.code) 
-        {
-        case error.PERMISSION_DENIED:
-          doc.innerHTML="Request for Geolocation denied by the user."
-          break;
-        case error.POSITION_UNAVAILABLE:
-          doc.innerHTML="Unavailable location information."
-          break;
-        case error.TIMEOUT:
-          doc.innerHTML="Location request timed out."
-          break;
-        case error.UNKNOWN_ERROR:
-          doc.innerHTML="UNKNOWN_ERROR."
-          break;
-        }
-}
-function calcRoute(start) {
+
+function calcRoute() {
 
   // First, remove any existing markers from the map.
   for (var i = 0; i < markerArray.length; i++) {
@@ -95,6 +70,7 @@ function calcRoute(start) {
 
   // Retrieve the start and end locations and create
   // a DirectionsRequest using WALKING directions.
+  var start = document.getElementById('start').value;
   var end = document.getElementById('end').value;
   var request = {
       origin: start,
