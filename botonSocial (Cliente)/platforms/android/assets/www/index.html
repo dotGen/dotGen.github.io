@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Botón social</title>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">     
+      <style>
+          #map {
+            height: 100%;
+          }
+          
+          html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+          }
+      </style>
+  </head>
+  <body onload="onLoad()">
+      <div id="changeip">
+          <input type="text" value="insert ip" id="ip_port">
+          <input type="button" value="Cambiar IP Server Auto" onclick="changeServerIP()">
+      </div>
+      <div id="message">Log</div>
+      <div id="map"></div>
+
+        <script>
+            
+            var map, marker, infowindow;
+            var url_icon_marker = "http://amr.osgeopt.pt/images/traffic-cone-icon-32.png";
+            var ip_port = "192.168.1.10:8080";
+            var url_bd = "http://"+ip_port+"/botonsocial/bdaccess.php?";
+            var zoom =15;
+            
+            var audio;
+            
+            function onLoad () {
+                document.addEventListener("deviceready", onDeviceReady, false);
+            }
+            
+            function onDeviceReady () {
+                initMap();   
+            }
+            
+            function initMap() {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: zoom,
+                        center : {lat: position.coords.latitude, lng: position.coords.longitude}
+                    });     
+                    
+                    map.addListener('click', function(e) {
+                        if (infowindow != null) return;
+                        putMarker(e.latLng);
+                        showInfowindow(e, map);
+                    });
+                    
+                }, function (onError) {
+                    document.getElementById("message").innerHTML = "load map failed";
+                }); 
+            }
+            
+            function saveMarker () {
+                var request = window.ActiveXObject ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest;
+                        
+                request.onreadystatechange = function() {
+                    if (request.readyState == 4 && request.status == 200) {
+                        google.maps.event.trigger(infowindow, 'closeclick');
+                        marker.setVisible(true);
+                        document.getElementById("message").innerHTML = "success";
+                    } else {
+                        document.getElementById("message").innerHTML = "fail";
+                    }
+                };
+                
+                var fd = new FormData();
+                
+                fd.append("pos", marker.getPosition().lat()+","+marker.getPosition().lng());
+                fd.append("text", document.getElementById("text").value);
+                
+                fd.append("photo", dataURItoBlob(document.getElementById("smallImage").src));
+                fd.append("audio", dataURItoBlob(audio));
+                
+                request.open('POST', url_bd, true);
+                request.send(fd);
+
+            }
+            
+            function putMarker (pos) {
+                marker = new google.maps.Marker({
+                    position: pos,
+                    map : map,
+                    icon : url_icon_marker,
+                    visible: false
+                });
+                
+                with ({ mark : marker }) {
+                    google.maps.event.addListener(mark, 'click', function () {
+                         openInfowindow(mark);  
+                    });
+                }
+            }
+            
+            function openInfowindow (marker) {
+                infowindow = new google.maps.InfoWindow({
+                    content: 'Texto',
+                    position: this.position
+                });
+                
+                infowindow.open(map, marker);  
+            }
+            
+            function showInfowindow (e, map) {
+                infowindow = new google.maps.InfoWindow({
+                    content: '<form>¿Qué denuncia? : <input type="text" id="text"><br><input type="button" id="audio" value="Audio" onclick="recordAudio()"><input type="button" id="photo" value = "Image" onclick="takePicture()"  ><img style="display:no+ne;width:60px;height:60px;" id="smallImage" src="" /><br><input type="button" value="Enviar denuncia" onclick="saveMarker()"></form>',
+                    position: e.latLng
+                });
+                
+                infowindow.open(map, marker); 
+                
+                 google.maps.event.addListener(infowindow, 'closeclick', function () {
+                        infowindow.close();
+                        infowindow = null;
+                 });
+            }
+            
+            function recordAudio () {
+                navigator.device.capture.captureAudio(function (mediaFiles) {
+                    window.resolveLocalFileSystemURI(mediaFiles[0].fullPath, function (fileEntry) {
+                        fileEntry.file(function (file) {                     
+                            var filereader = new FileReader();
+                            filereader.onloadend =  function (evt) {
+                              audio = evt.target.result;  
+                              document.getElementById("message").innerHTML = "on load success : ";
+                            };
+                            filereader.readAsDataURL(file);
+                            document.getElementById("message").innerHTML = "success_partial";   
+                        }, function (error){
+                            document.getElementById("message").innerHTML = "error audio3";       
+                        });
+                    }, function (error) {
+                        document.getElementById("message").innerHTML = "error audio2";
+                    });
+                }, function (error) {
+                    document.getElementById("message").innerHTML = "error audio1";
+                }, { limit:1});
+            }
+                    
+            function takePicture () {
+                navigator.camera.getPicture(onSuccess, onFail, { quality: 50,
+                    destinationType: Camera.DestinationType.DATA_URL
+                });
+
+                function onSuccess(imageData) {
+                    var image = document.getElementById('smallImage');
+                    image.src = "data:image/jpeg;base64," + imageData;
+                    document.getElementById("message").innerHTML = "success camera";
+                }
+
+                function onFail(message) {
+                    document.getElementById("message").innerHTML = "fail camera";
+                }
+            }
+                     
+            function dataURItoBlob(dataURI) {
+                var byteString;
+                if (dataURI.split(',')[0].indexOf('base64') >= 0)
+                    byteString = atob(dataURI.split(',')[1]);
+                else
+                    byteString = unescape(dataURI.split(',')[1]);
+                var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+                var ia = new Uint8Array(byteString.length);
+                for (var i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }            
+                return new Blob([ia], {type:mimeString});
+            }  
+            
+            
+            /*DEBUG*/
+            
+            function changeServerIP () {
+                ip_port = document.getElementById("ip_port").value;
+                document.getElementById("message").innerHTML="Ip changed ";
+            }
+            
+        </script>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="index.js"></script>
+	    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJU4E6--Sj1P8hECcGSFMA_QasX5q9OgA&signed_in=true"></script>
+  </body>
+</html>
