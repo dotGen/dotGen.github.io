@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<!-- No intenten probarlo aun, lo puse aqui para tenerlo a mano :) :O :)-->
+
+
+<html>
+  <head>
+    <title>Botón social</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+      <div id="message"></div>
+      <div id="map"></div>
+        <script>
+            
+            var map, marker, infowindow;
+            var url_icon_marker = "http://amr.osgeopt.pt/images/traffic-cone-icon-32.png";
+            var url_bd = "http://localhost:8080/botonsocial/bdaccess.php?";
+            var zoom =20;        
+                       
+            /*------CORDOVA PLUGINS-----*/
+            
+            document.addEventListener("deviceready", onDeviceReady, false);
+            
+            /*------AUDIO PLUGIN ------*/
+            
+            function recordAudio() {
+                var src = "myrecording.amr";
+                var mediaRec = new Media(src, onSuccess, onError);
+
+                // Record audio
+                mediaRec.startRecord();
+
+                // Stop recording after 10 sec
+                var recTime = 0;
+                var recInterval = setInterval(function() {
+                    recTime = recTime + 1;
+                    setAudioPosition(recTime + " sec");
+                    if (recTime >= 10) {
+                        clearInterval(recInterval);
+                        mediaRec.stopRecord();
+                    }
+                }, 1000);
+            }
+            
+            
+            /*-------PHOTO PLUGIN------*/
+            
+            
+            function takePicture () {
+                //navigator.camera.getPicture(...);
+            }
+            
+            /*--------------------*/
+            
+      
+            function initMap() {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: zoom,
+                        center: {lat: position.coords.latitude, lng: position.coords.longitude}
+                    });
+
+                    map.addListener('click', function(e) {
+                        putMarker(e.latLng);
+                        showInfowindow(e, map);
+                    });
+                });
+                
+                loadMarkers();
+                
+            }
+            
+            function showInfowindow (e, map) {
+                infowindow = new google.maps.InfoWindow({
+                    content: '<div id="form"><form method="post" onsubmit="return putMarker()">¿Qué denuncia? : <input type="text" id="text"><br><input type="button" id="audio" value="Audio"><input type="button"  id="photo" value="Foto" ><br><input type="button" value="Enviar denuncia" onclick="saveMarker()"></form></div>',
+                    position: e.latLng
+                });
+
+                infowindow.open(map,marker);
+                
+            }
+            
+            function saveMarker () {
+                var text = escape(document.getElementById("text").value);
+                var audio = escape(document.getElementById("audio").value);
+                var photo = document.getElementById("photo").value;
+                var latlng = marker.getPosition();
+
+                var url = url_bd + "text=" + text + "&audio=" + audio +
+                        "&photo=" + photo + "&lat=" + latlng.lat() + "&lng=" + latlng.lng();
+                downloadUrl(url, function(data, responseCode) {
+                    if (responseCode == 200 && data.length >= 1) {
+                        infowindow.close();
+                        document.getElementById("message").innerHTML = "Location added.";
+                    }
+                });
+            }
+            
+            function downloadUrl(url, callback) {
+                var request = window.ActiveXObject ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest;
+                request.onreadystatechange = function() {
+                    if (request.readyState == 4) {
+                      request.onreadystatechange = function () {};
+                      callback(request.responseText, request.status);
+                    }
+                };
+                request.open('GET', url, true);
+                request.send(null);
+            }
+            
+            function putMarker (pos) {
+                marker = new google.maps.Marker({
+                    position: pos,
+                    map : map,
+                    icon : url_icon_marker
+                });
+                with ({ mark : marker }) {
+                    google.maps.event.addListener(mark, 'click', function () {
+                         document.getElementById("message").innerHTML=mark.getPosition();
+                         openInfowindow(mark);  
+                    });
+                }
+            }
+            
+                        /*----------------TO DO-------------------*/
+            
+            function openInfowindow(marker) {
+                //Coger de la bd los datos con ajax
+                
+                var text = "denuncia", photo = "foto", audio = "audio";
+                
+                //Mostrarla
+                
+                infowindow = new google.maps.InfoWindow({     
+                    content: '<div> Texto</div>',
+                    position :  this.position
+                });
+                infowindow.open(map, marker);
+            }
+            
+            function loadMarkers() {
+                
+            }
+
+        </script>
+	    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJU4E6--Sj1P8hECcGSFMA_QasX5q9OgA&signed_in=true&callback=initMap"></script>
+  </body>
+</html>
