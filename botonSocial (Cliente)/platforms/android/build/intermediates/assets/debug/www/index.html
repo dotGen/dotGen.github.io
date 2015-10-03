@@ -10,8 +10,7 @@
       <style>
           #map {
             height: 100%;
-          }
-          
+          }         
           html, body {
             height: 100%;
             margin: 0;
@@ -28,15 +27,27 @@
       <div id="map"></div>
 
         <script>
+
+            /*DATABASE/SERVER PROPERTIES*/
+            
+            var ip_port = "192.168.1.10:8080";
+            var url_bd = "http://"+ip_port+"/botonsocial/bdaccess.php?";
+            
+            /*MAP PROPERTIES*/
             
             var map, marker, infowindow;
             var url_icon_marker = "http://amr.osgeopt.pt/images/traffic-cone-icon-32.png";
-            var ip_port = "192.168.1.10:8080";
-            var url_bd = "http://"+ip_port+"/botonsocial/bdaccess.php?";
-            var zoom =15;
+            var zoom = 15;
             
-            var audio;
+            /*AUDIO CAPTURE PROPERTIES*/
             
+            var max_record_duration_in_seconds = 15;
+            var limit_of_numer_audio_clips = 1;
+            
+            /*PHOTO CAPTURE PROPERTIES*/
+            
+            var quality_image = 50;
+                      
             function onLoad () {
                 document.addEventListener("deviceready", onDeviceReady, false);
             }
@@ -70,9 +81,9 @@
                     if (request.readyState == 4 && request.status == 200) {
                         google.maps.event.trigger(infowindow, 'closeclick');
                         marker.setVisible(true);
-                        document.getElementById("message").innerHTML = "success";
+                        document.getElementById("message").innerHTML = "success_send_to_server";
                     } else {
-                        document.getElementById("message").innerHTML = "fail";
+                        document.getElementById("message").innerHTML = "fail_send_to_server";
                     }
                 };
                 
@@ -82,7 +93,7 @@
                 fd.append("text", document.getElementById("text").value);
                 
                 fd.append("photo", dataURItoBlob(document.getElementById("smallImage").src));
-                fd.append("audio", dataURItoBlob(audio));
+                fd.append("audio", dataURItoBlob(document.getElementById("audio").src));
                 
                 request.open('POST', url_bd, true);
                 request.send(fd);
@@ -115,7 +126,7 @@
             
             function showInfowindow (e, map) {
                 infowindow = new google.maps.InfoWindow({
-                    content: '<form>¿Qué denuncia? : <input type="text" id="text"><br><input type="button" id="audio" value="Audio" onclick="recordAudio()"><input type="button" id="photo" value = "Image" onclick="takePicture()"  ><img style="display:no+ne;width:60px;height:60px;" id="smallImage" src="" /><br><input type="button" value="Enviar denuncia" onclick="saveMarker()"></form>',
+                    content: '<form>¿Qué denuncia? : <input type="text" id="text"><br><input type="button" id="audio" value="Audio" onclick="recordAudio()"><input type="button" id="photo" value = "Image" onclick="takePicture()"  ><input type="hidden" id="audio"><img style="display:no+ne;width:60px;height:60px;" id="smallImage" src="" /><br><input type="button" value="Enviar denuncia" onclick="saveMarker()"></form>',
                     position: e.latLng
                 });
                 
@@ -133,35 +144,38 @@
                         fileEntry.file(function (file) {                     
                             var filereader = new FileReader();
                             filereader.onloadend =  function (evt) {
-                              audio = evt.target.result;  
-                              document.getElementById("message").innerHTML = "on load success : ";
+                              document.getElementById("audio").src= evt.target.result;                          
+                              document.getElementById("message").innerHTML = "succes_loaded_audio";
                             };
                             filereader.readAsDataURL(file);
-                            document.getElementById("message").innerHTML = "success_partial";   
+                            document.getElementById("message").innerHTML = "success_partial_audio";   
                         }, function (error){
-                            document.getElementById("message").innerHTML = "error audio3";       
+                            document.getElementById("message").innerHTML = "fail_to_conver_audio_to_file";  
                         });
                     }, function (error) {
-                        document.getElementById("message").innerHTML = "error audio2";
+                        document.getElementById("message").innerHTML = "fail_to_find_audiofile_filesystem";
                     });
                 }, function (error) {
-                    document.getElementById("message").innerHTML = "error audio1";
-                }, { limit:1});
+                    document.getElementById("message").innerHTML = "fail_to_record_audio";
+                }, { 
+                    limit:limit_of_numer_audio_clips, 
+                    duration: max_record_duration_in_seconds
+                });
             }
                     
             function takePicture () {
-                navigator.camera.getPicture(onSuccess, onFail, { quality: 50,
+                navigator.camera.getPicture(onSuccess, onFail, { 
+                    quality: quality_image,
                     destinationType: Camera.DestinationType.DATA_URL
                 });
 
                 function onSuccess(imageData) {
-                    var image = document.getElementById('smallImage');
-                    image.src = "data:image/jpeg;base64," + imageData;
-                    document.getElementById("message").innerHTML = "success camera";
+                    image.src = "data:image/jpeg;base64," + document.getElementById('smallImage');
+                    document.getElementById("message").innerHTML = "success_camera";
                 }
 
                 function onFail(message) {
-                    document.getElementById("message").innerHTML = "fail camera";
+                    document.getElementById("message").innerHTML = "fail_camera";
                 }
             }
                      
@@ -184,7 +198,7 @@
             
             function changeServerIP () {
                 ip_port = document.getElementById("ip_port").value;
-                document.getElementById("message").innerHTML="Ip changed ";
+                document.getElementById("message").innerHTML="ip changed to -> "+ip_port;
             }
             
         </script>

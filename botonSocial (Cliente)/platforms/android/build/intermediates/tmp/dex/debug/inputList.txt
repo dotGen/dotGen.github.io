@@ -1,2 +1,2 @@
-C:\Users\VICTOR\Desktop\botonSocial\platforms\android\build\intermediates\classes\debug
-C:\Users\VICTOR\Desktop\botonSocial\platforms\android\build\intermediates\pre-dexed\debug\classes-9d239648d03fecacb01e3744583b9a710cf11f10.jar
+C:\Users\VICTOR\Desktop\botonSocial\botonSocial (Cliente)\platforms\android\build\intermediates\classes\debug
+C:\Users\VICTOR\Desktop\botonSocial\botonSocial (Cliente)\platforms\android\build\intermediates\pre-dexed\debug\classes-69acf8e0116ef9a8cf3f82dd4b89498541e9a9b5.jar
