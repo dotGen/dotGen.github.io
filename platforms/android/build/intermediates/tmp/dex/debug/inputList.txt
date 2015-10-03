@@ -1,0 +1,2 @@
+C:\Users\VICTOR\Desktop\botonSocial\platforms\android\build\intermediates\classes\debug
+C:\Users\VICTOR\Desktop\botonSocial\platforms\android\build\intermediates\pre-dexed\debug\classes-9d239648d03fecacb01e3744583b9a710cf11f10.jar
