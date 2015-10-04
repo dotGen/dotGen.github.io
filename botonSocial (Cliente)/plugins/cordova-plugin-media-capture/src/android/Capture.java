@@ -201,7 +201,9 @@ public class Capture extends CordovaPlugin {
      */
     private void captureAudio() {
         Intent intent = new Intent(android.provider.MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-
+        
+        intent.putExtra(android.provider.MediaStore.Audio.Media.EXTRA_MAX_BYTES, 100);
+        
         this.cordova.startActivityForResult((CordovaPlugin) this, intent, CAPTURE_AUDIO);
     }
 

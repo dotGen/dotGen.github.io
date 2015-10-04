@@ -30,8 +30,11 @@
 
             /*DATABASE/SERVER PROPERTIES*/
             
+            var upload_php = "upload.php?";
+            var download_php = "download.php?";
+            
             var ip_port = "192.168.1.10:8080";
-            var url_bd = "http://"+ip_port+"/botonsocial/bdaccess.php?";
+            var url_server = "http://"+ip_port+"/botonsocial/";
             
             /*MAP PROPERTIES*/
             
@@ -58,6 +61,7 @@
             
             function initMap() {
                 navigator.geolocation.getCurrentPosition(function (position) {
+                    document.getElementById("message").innerHTML = position.coords.latitude+","+position.coords.longitude;
                     map = new google.maps.Map(document.getElementById('map'), {
                         zoom: zoom,
                         center : {lat: position.coords.latitude, lng: position.coords.longitude}
@@ -65,16 +69,45 @@
                     
                     map.addListener('click', function(e) {
                         if (infowindow != null) return;
-                        putMarker(e.latLng);
+                        putMarker(e.latLng, false);
                         showInfowindow(e, map);
                     });
+                    
+                    initMarkers();
                     
                 }, function (onError) {
                     document.getElementById("message").innerHTML = "load map failed";
                 }); 
             }
             
+            function initMarkers () {
+                         
+                $.ajax({
+                    
+                    url: url_server+""+download_php,
+                    
+                    type: 'POST',
+                    
+                    dataType: 'json',
+                    
+                    success: function (json) {
+                        document.getElementById("message").innerHTML = "success_load_markes : "+ json.length;
+                        
+                       for (var i = 0; i < json.length; i++) {
+                            putMarker({lat: json[i].lat, lng: json[i].lng}, true);
+                        }
+                        
+                    },
+                    
+                    error: function (xhr, status) {
+                        document.getElementById("message").innerHTML = "failed_load_markers"+status+" "+xhr;
+                    }
+                });
+            }
+            
             function saveMarker () {
+                
+                document.getElementById("message").innerHTML = "enter";
                 var request = window.ActiveXObject ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest;
                         
                 request.onreadystatechange = function() {
@@ -95,17 +128,17 @@
                 fd.append("photo", dataURItoBlob(document.getElementById("smallImage").src));
                 fd.append("audio", dataURItoBlob(document.getElementById("audio").src));
                 
-                request.open('POST', url_bd, true);
+                request.open('POST', url_server+""+upload_php, true);
                 request.send(fd);
 
             }
             
-            function putMarker (pos) {
+            function putMarker (pos, visible) {
                 marker = new google.maps.Marker({
                     position: pos,
                     map : map,
                     icon : url_icon_marker,
-                    visible: false
+                    visible: visible
                 });
                 
                 with ({ mark : marker }) {
@@ -116,12 +149,42 @@
             }
             
             function openInfowindow (marker) {
-                infowindow = new google.maps.InfoWindow({
-                    content: 'Texto',
-                    position: this.position
+                
+                $.ajax({
+                
+                    url: url_server+""+download_php,
+                    
+                    type:'POST',
+                    
+                    data: { marker_coords : marker.position.lat+","+marker.position.lng},
+                    
+                    dataType: 'json',
+                    
+                    success: function (json) {
+                        
+                        document.getElementById("message").innerHTML = json[0].img;
+                        
+                        infowindow = new google.maps.InfoWindow({
+                            content: '<div><p>¿Qué denuncia? : '+json[0].text+"</p><img style='width:60px;heigth:60px;' src=\""+json[0].img+"\"/><audio controls><source src=\""+json[0].audio+"\" type='audio/ogg'></audio><p>Valoración : "+json[0].val+"</p></div>",
+                            position: this.position
+                        });
+
+                        infowindow.open(map, marker); 
+
+                         google.maps.event.addListener(infowindow, 'closeclick', function () {
+                                infowindow.close();
+                                infowindow = null;
+                         });
+                        
+                    },
+                       
+                    error: function (xhr, status) {
+                        document.getElementById("message").innerHTML = "fail_to_load_marker_info"+status;
+                    }
+                    
                 });
                 
-                infowindow.open(map, marker);  
+
             }
             
             function showInfowindow (e, map) {
@@ -170,7 +233,7 @@
                 });
 
                 function onSuccess(imageData) {
-                    image.src = "data:image/jpeg;base64," + document.getElementById('smallImage');
+                    document.getElementById('smallImage').src = "data:image/jpeg;base64," + imageData;
                     document.getElementById("message").innerHTML = "success_camera";
                 }
 
@@ -193,7 +256,6 @@
                 return new Blob([ia], {type:mimeString});
             }  
             
-            
             /*DEBUG*/
             
             function changeServerIP () {
@@ -204,6 +266,7 @@
         </script>
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="index.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 	    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJU4E6--Sj1P8hECcGSFMA_QasX5q9OgA&signed_in=true"></script>
   </body>
 </html>
