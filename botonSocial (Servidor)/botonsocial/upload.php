@@ -28,7 +28,10 @@
         move_uploaded_file($_FILES["audio"]["tmp_name"], $target_dir_audio.$filename_audio);
     }
 
+
     /*Add entry to database*/
+    
+        // Add $text, $coords, $filename_audio, $filename_img
     
     /***********************/
 
